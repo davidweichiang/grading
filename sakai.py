@@ -10,7 +10,7 @@ class Assignment(object):
 
     def read(self, root):
         root = os.path.abspath(root)
-        records = {}
+        self.records = {}
 
         # Use grades.csv as table of contents
         with open(os.path.join(root, 'grades.csv')) as gradesfile:
@@ -21,11 +21,11 @@ class Assignment(object):
         self.headers = grades[2]
         for row in grades[3:]:
             displayid, eid, lastname, firstname, grade = row
-            records[eid] = {}
-            records[eid]['displayid'] = displayid
-            records[eid]['lastname'] = lastname
-            records[eid]['firstname'] = firstname
-            records[eid]['grade'] = grade
+            self.records[eid] = record = {}
+            record['displayid'] = displayid
+            record['lastname'] = lastname
+            record['firstname'] = firstname
+            record['grade'] = grade
 
             fullname = '{}, {}({})'.format(lastname, firstname, eid)
             dir = os.path.join(root, fullname)
@@ -33,14 +33,14 @@ class Assignment(object):
                 submitfile = os.path.join(dir, fullname+"_submissionText.html")
                 if os.path.isfile(submitfile):
                     with open(submitfile) as sfile:
-                        records[eid]['submission_html'] = sfile.read()
+                        record['submission_html'] = sfile.read()
 
                 submitdir = os.path.join(dir, "Submission attachment(s)")
                 if os.path.isdir(submitdir):
-                    records[eid]['submission_files'] = []
+                    record['submission_files'] = []
                     for file in os.listdir(submitdir):
                         if file in ignore_files: continue
-                        records[eid]['submission_files'].append(os.path.join(submitdir, file))
+                        record['submission_files'].append(os.path.join(submitdir, file))
 
                 feedbackfile = os.path.join(dir, "feedbackText.html")
                 if os.path.isfile(feedbackfile):
@@ -49,22 +49,20 @@ class Assignment(object):
                     # Sakai only copies the submission into the inline feedback
                     # if the grader actually types something
                     if len(s) == 0:
-                        s = records[eid]['submission_html']
-                    records[eid]['feedback_html'] = s
+                        s = record['submission_html']
+                    record['feedback_html'] = s
 
                 commentsfile = os.path.join(dir, "comments.txt")
                 if os.path.isfile(commentsfile):
                     with open(commentsfile) as ffile:
-                        records[eid]['comments_html'] = ffile.read()
+                        record['comments_html'] = ffile.read()
 
                 feedbackdir = os.path.join(dir, "Feedback Attachment(s)")
                 if os.path.isdir(feedbackdir):
-                    records[eid]['feedback_files'] = []
+                    record['feedback_files'] = []
                     for file in os.listdir(feedbackdir):
                         if file in ignore_files: continue
-                        records[eid]['feedback_files'].append(os.path.join(feedbackdir, file))
-
-        self.records = records
+                        record['feedback_files'].append(os.path.join(feedbackdir, file))
 
     def write(self, root):
         root = os.path.abspath(root)
